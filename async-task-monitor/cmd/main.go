@@ -12,17 +12,20 @@ import (
 
 func main() {
 	updates := make(chan model.Task, 16)
+	actions := make(chan manager.Action, 16)
 
-	p := tea.NewProgram(ui.InitialModel())
+	p := tea.NewProgram(ui.InitialModel(actions))
 
 	go func() {
 		tasks := []model.Task{
-			{ID: "1", Name: "Build API", Status: model.Pending},
-			{ID: "2", Name: "Run Tests", Status: model.Pending},
-			{ID: "3", Name: "Deploy", Status: model.Pending},
+			{ID: "1", Name: "Build API Service", Status: model.Queued},
+			{ID: "2", Name: "Run Integration Tests", Status: model.Queued},
+			{ID: "3", Name: "Deploy Production", Status: model.Queued},
+			{ID: "4", Name: "Generate Reports", Status: model.Queued},
+			{ID: "5", Name: "Sync S3 Backups", Status: model.Queued},
 		}
 
-		manager.RunTasks(tasks, updates)
+		manager.RunTasks(tasks, updates, actions)
 
 		for update := range updates {
 			p.Send(ui.TaskUpdateMsg(update))
